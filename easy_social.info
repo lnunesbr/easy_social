@@ -1,29 +1,16 @@
 name = Easy Social
 description = "Simple module that add most common share buttons to nodes"
 
-; Core version (required)
+; Core version
 core = 7.x
 
-; Package name (see http://drupal.org/node/542202 for a list of names)
-; package = 
-
-; PHP version requirement (optional)
-; php = 5.2
-
 ; Loadable code files
-; files[] = easy_social.module
-; files[] = easy_social.admin.inc
-; files[] = easy_social.class.inc
+files[] = easy_social.module
 
 ; Module dependencies
-; dependencies[] = mymodule
-; dependencies[] = theirmodule (1.2)
-; dependencies[] = anothermodule (>=2.4)
-; dependencies[] = views (3.x)
+dependencies[] = variable
+dependencies[] = variable_realm
+dependencies[] = variable_store
 
 ; Configuration page
-; configure = admin/config/easy_social
-
-
-; For further information about configuration options, see
-; - http://drupal.org/node/542202
+configure = admin/config/content/easysocial
