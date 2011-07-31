@@ -55,14 +55,14 @@ function easy_social_variable_info() {
   
   $variables['easysocial_tt_global_account_via'] = array(
     'title' => t('Easy Social Global Mention Account'),
-    'default' => -1,
+    'default' => '',
     'group' => 'easysocial',
     'token' => FALSE,
   );
   
   $variables['easysocial_tt_global_account_related'] = array(
     'title' => t('Easy Social Global Related Account'),
-    'default' => -1,
+    'default' => '',
     'group' => 'easysocial',
     'token' => FALSE,
   );
@@ -94,7 +94,7 @@ function easy_social_variable_info() {
   
     $variables['easysocial_' . $type . '_social_buttons'] = array(
       'title' => t('Easy Social Network Buttons for %type', array('%type' => $typeobj->name)),
-      'default' => -1,
+      'default' => array(),
       'group' => 'easysocial',
       'token' => FALSE,
     );
