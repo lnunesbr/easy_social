@@ -10,7 +10,6 @@ files[] = easy_social.module
 ; Module dependencies
 dependencies[] = variable
 dependencies[] = variable_realm
-dependencies[] = variable_store
 
 ; Configuration page
 configure = admin/config/content/easysocial
