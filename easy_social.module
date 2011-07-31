@@ -1,0 +1,32 @@
+<?php
+/**
+ * @file
+ * This is the file description for Easy Social module.
+ *
+ * In this more verbose, multi-line description, you can specify what this
+ * file does exactly. Make sure to wrap your documentation in column 78 so
+ * that the file can be displayed nicely in default-sized consoles.
+ */
+
+/**
+ * Implements hook_permission().
+ */
+function easy_social_permission() {
+  return array(
+    'administer easy social' => array(
+      'title' => t('Administer Easy Social'),
+      'description' => t('Manage Easy Social permissions.'),
+    ),
+  );
+}
+
+/**
+ * Implements hook_menu().
+ */
+function easy_social_menu() {
+  $items = array();
+
+  // Type '$item ⇥' to create a new menu item.
+
+  return $items;
+}
