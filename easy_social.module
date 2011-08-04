@@ -217,7 +217,6 @@ function admin_config_easy_social(){
 function easy_social_theme() {
   $theme = array(
     'easy_social_links' => array(
-      // 'render element' => 'elements',
       'template' => 'easy-social-links',
       'variables' => array('social_links' => NULL),
     ),
@@ -247,15 +246,15 @@ function easy_social_field_extra_fields() {
 }
 
 /**
- * Implements hook_entity_view().
+ * Implements hook_node_view().
  * Certify to load the buttons in the moment I want
  */
-function easy_social_entity_view($entity, $type, $view_mode, $langcode) {
+function easy_social_node_view($node, $view_mode, $langcode) {
    
   //Check if this type has a custom setting
-  if(variable_get_value('easysocial_' . $entity->type . '_override') == 1){
-    $type = variable_get_value('easysocial_' . $entity->type . '_typebtn');
-    $buttons = variable_get_value('easysocial_' . $entity->type . '_social_buttons');
+  if(variable_get_value('easysocial_' . $node->type . '_override') == 1){
+    $type = variable_get_value('easysocial_' . $node->type . '_typebtn');
+    $buttons = variable_get_value('easysocial_' . $node->type . '_social_buttons');
   } 
     //Global settings
     else {
@@ -264,7 +263,7 @@ function easy_social_entity_view($entity, $type, $view_mode, $langcode) {
   }
   
   //Url to be shared
-  $url = url('node/'.$entity->nid, array('absolute' => TRUE));
+  $url = url('node/'.$node->nid, array('absolute' => TRUE));
   
   $social_links = array();
   
@@ -272,43 +271,44 @@ function easy_social_entity_view($entity, $type, $view_mode, $langcode) {
   foreach ($buttons as $service) {
     if(is_string($service)){
       $data = array(
-        'nid' => $entity->nid,
-        'title' => $entity->title
+        'nid' => $node->nid,
+        'title' => $node->title
       );
-      eval("js_add_{$service}();");
-      eval("\$social_links[\$service] = button_{$service}_markup(\$url, \$type, \$data);");
+      eval("_easysocial_js_add_{$service}();");
+      eval("\$social_links[\$service] = _easysocial_button_{$service}_markup(\$url, \$type, \$data);");
     }
   }
   
   //If at least one button is selected, go on
   if(count($social_links) > 0){
-    $entity->content['easy_social'] = array(
+    $node->content['easy_social'] = array(
       '#theme' => 'easy_social_links',
       '#social_links' => $social_links,
       '#weight' => 999
     );
   }
+  
 }
 
 
 /**
  * Add external facebook js
  */
-function js_add_facebook(){
+function _easysocial_js_add_facebook(){
   drupal_add_js('http://static.ak.fbcdn.net/connect.php/js/FB.Share', 'external');
 }
 
 /**
  * Add external twitter js
  */
-function js_add_twitter(){
+function _easysocial_js_add_twitter(){
   drupal_add_js('http://platform.twitter.com/widgets.js', 'external');
 }
 
 /**
  * Add external googleplus js
  */
-function js_add_googleplus(){
+function _easysocial_js_add_googleplus(){
   drupal_add_js('https://apis.google.com/js/plusone.js', 'external');
 }
 
@@ -319,7 +319,7 @@ function js_add_googleplus(){
  * @param $data Actually not used
  * @return the html markup
  */
-function button_facebook_markup($url, $type, $data = NULL, $lang = 'en_US'){
+function _easysocial_button_facebook_markup($url, $type, $data = NULL, $lang = 'en_US'){
   if($type == 0){
     $type_box = 'button_count';
     $markup = <<<FB
@@ -351,7 +351,7 @@ FB;
  * @param $data Assoc array with info for the tweet
  * @return the html markup
  */
-function button_twitter_markup($url, $type, $data = NULL, $lang = 'en'){
+function _easysocial_button_twitter_markup($url, $type, $data = NULL, $lang = 'en'){
   $type = ($type == 0) ? 'horizontal' : 'vertical';
   
   $account_via = variable_get_value('easysocial_tt_global_account_via');
@@ -379,7 +379,7 @@ TT;
  * @param $data Actually not used
  * @return the html markup
  */
-function button_googleplus_markup($url, $type, $data = NULL, $lang = 'en_US'){
+function _easysocial_button_googleplus_markup($url, $type, $data = NULL, $lang = 'en_US'){
   $type = ($type == 0) ? 'medium' : 'tall';
   $markup = <<<GP
     <g:plusone size="{$type}" href="{$url}"></g:plusone>
