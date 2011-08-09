@@ -18,4 +18,7 @@
   <?php if(isset($social_links['googleplus'])): ?>
   <span class='easysocial-widget-googleplus'><?php echo $social_links['googleplus']; ?></span>  
   <? endif; ?>
+  <?php if(isset($social_links['linkedin'])): ?>
+  <span class='easysocial-widget-linkedin'><?php echo $social_links['linkedin']; ?></span>  
+  <? endif; ?>
 </div>

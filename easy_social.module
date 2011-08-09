@@ -48,7 +48,7 @@ function easy_social_variable_info() {
   
   $variables['easysocial_global_social_buttons'] = array(
     'title' => t('Easy Social Global Type of Network Buttons'),
-    'default' => array('twitter', 'facebook', 'googleplus'),
+    'default' => array('twitter', 'facebook', 'googleplus','linkedin'),
     'group' => 'easysocial',
     'token' => FALSE,
   );
@@ -127,7 +127,7 @@ function admin_config_easy_social(){
   $form['global_settings']['easysocial_global_social_buttons'] = array(
     '#type' => 'checkboxes',
     '#title' => t('Social Buttons'),
-    '#options' => array('twitter' => 'Twitter', 'facebook' => 'Facebook','googleplus' => 'Google Plus'),
+    '#options' => array('twitter' => 'Twitter', 'facebook' => 'Facebook','googleplus' => 'Google Plus','linkedin' => 'Linked In'),
     '#default_value' => variable_get_value('easysocial_global_social_buttons'),
   );
   
@@ -200,7 +200,7 @@ function admin_config_easy_social(){
     $form['override_settings']['easysocial_settings_type_' . $type]['easysocial_' . $type . '_social_buttons'] = array(
      '#type' => 'checkboxes',
      '#title' => t('Social Buttons'),
-     '#options' => array('twitter' => 'Twitter', 'facebook' => 'Facebook','googleplus' => 'Google Plus'),
+     '#options' => array('twitter' => 'Twitter', 'facebook' => 'Facebook','googleplus' => 'Google Plus','linkedin' => 'Linked In'),
      '#default_value' => variable_get_value('easysocial_' . $type . '_social_buttons'),
     );
 
@@ -313,6 +313,13 @@ function _easysocial_js_add_googleplus(){
 }
 
 /**
+ * Add external linkedin js
+ */
+function _easysocial_js_add_linkedin(){
+  drupal_add_js('http://platform.linkedin.com/in.js', 'external');
+}
+
+/**
  * Generate the needed markup for the facebook share link
  * @param $url The url to be shared
  * @param $type Generate horizontal or vertical widgets
@@ -373,7 +380,7 @@ TT;
 }
 
 /**
- * Generate the needed markeup for the facebook share link
+ * Generate the needed markeup for the googleplus share link
  * @param $url The url to be shared
  * @param $type Generate horizontal or vertical widgets
  * @param $data Actually not used
@@ -384,5 +391,20 @@ function _easysocial_button_googleplus_markup($url, $type, $data = NULL, $lang =
   $markup = <<<GP
     <g:plusone size="{$type}" href="{$url}"></g:plusone>
 GP;
+    return $markup;
+}
+
+/**
+ * Generate the needed markeup for the linkedin share link
+ * @param $url The url to be shared
+ * @param $type Generate horizontal or vertical widgets
+ * @param $data Actually not used
+ * @return the html markup
+ */
+function _easysocial_button_linkedin_markup($url, $type, $data = NULL, $lang = 'en_US'){
+  $type = ($type == 0) ? 'right' : 'top';
+  $markup = <<<LI
+    <script type="in/share" data-url="{$url}" data-counter="{$type}"></script>
+LI;
     return $markup;
 }
