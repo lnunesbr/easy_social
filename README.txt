@@ -11,16 +11,12 @@ None.
 
 -- INSTALLATION --
 
-* Install as usual, see http://drupal.org/node/895232 for further information.
+* Install as usual, see http://drupal.org/node/70151 for further information.
 
 
 -- CONFIGURATION --
 
-* Go to /admin/config/content/easysocial and change it the way you want.
-
-* Also, go to Structure > Content Types > Type > Manage display
-
-  - Make Easy Social visible
+* Go to /admin/settings/easysocial and change it the way you want.
 
 
 -- CONTACT --
