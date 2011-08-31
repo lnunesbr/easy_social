@@ -21,19 +21,35 @@ function easy_social_perm() {
 function easy_social_menu() {
   $items = array();
 
+  $items['admin/settings/easysocial/default'] = array(
+    'title' => 'Settings',
+    'access arguments' => array('administer easy social'),
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+  );
+
   $items['admin/settings/easysocial'] = array(
-    'title' => 'Easy Social Settings',
+    'title' => 'Easy Social',
     'description' => 'Configure the social buttons and node types',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('admin_settings_easy_social'),
     'access arguments' => array('administer easy social'),
+    'type' => MENU_LOCAL_TASK,
   );
 
+  $items['admin/settings/easysocial/paths-ignore'] = array(
+    'title' => 'Ignore Paths',
+    'description' => 'Global paths to ignore and do not display Easy Social',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('admin_settings_easy_social_ignore_paths'),
+    'access arguments' => array('administer easy social'),
+    'type' => MENU_LOCAL_TASK,
+  );
+  
   return $items;
 }
 
 /**
- * Generate the administer form
+ * Generate the administer settings form
  */
 function admin_settings_easy_social(){
   $form = array();
@@ -66,6 +82,21 @@ function admin_settings_easy_social(){
     '#title' => t('Type of buttons'),
     '#options' => array(t('Horizontal'), t('Vertical')),
     '#default_value' => variable_get('easysocial_global_typebtn', 0),
+  );
+  
+   $form['global_settings']['easysocial_global_btn_positioning'] = array(
+    '#type' => 'checkboxes',
+    '#title' => t('Positioning of the buttons in node view'),
+        '#description' => t('Available only for full node view'),
+    '#options' => array('top' => t('Top'), 'bottom' => t('Bottom')),
+    '#default_value' => variable_get('easysocial_global_btn_positioning', array('bottom')),
+  );
+   
+  $form['global_settings']['easysocial_global_node_view'] = array(
+    '#type' => 'checkboxes',
+    '#title' => t('Manage display in node view'),
+    '#options' => array('teaser' => t('Teaser'), 'fullnode' => t('Full Node')),
+    '#default_value' => variable_get('easysocial_global_node_view', array('teaser', 'fullnode')),
   );
   
   $form['global_settings']['easysocial_global_social_buttons'] = array(
@@ -144,6 +175,21 @@ function admin_settings_easy_social(){
        '#title' => t('Type of buttons'),
        '#options' => array(t('Horizontal'), t('Vertical')),
        '#default_value' => variable_get('easysocial_' . $type . '_typebtn', '')
+      );  
+  
+      $form['override_settings']['easysocial_settings_type_' . $type]['easysocial_' . $type . '_btn_positioning'] = array(
+        '#type' => 'checkboxes',
+        '#title' => t('Positioning of the buttons in node view'),
+        '#description' => t('Available only for full node view'),
+        '#options' => array('top' => t('Top'), 'bottom' => t('Bottom')),
+        '#default_value' => variable_get('easysocial_' . $type . '_btn_positioning', array('bottom')),
+      );  
+  
+      $form['override_settings']['easysocial_settings_type_' . $type]['easysocial_' . $type . '_node_view'] = array(
+        '#type' => 'checkboxes',
+        '#title' => t('Manage display in node view'),
+        '#options' => array('teaser' => t('Teaser'), 'fullnode' => t('Full Node')),
+        '#default_value' => variable_get('easysocial_' . $type . '_node_view', array('teaser', 'fullnode')),
       );
 
       $form['override_settings']['easysocial_settings_type_' . $type]['easysocial_' . $type . '_social_buttons'] = array(
@@ -156,6 +202,26 @@ function admin_settings_easy_social(){
     }
     
   }
+  
+  $form = system_settings_form($form);
+  
+  return $form;
+}
+
+/**
+ * Generate the administer ignore paths settings form
+ */
+function admin_settings_easy_social_ignore_paths(){
+  $form = array();
+  
+  $node_types = node_get_types();
+  
+  $form['easysocial_ignore_paths'] = array(
+    '#type' => 'textarea',
+    '#title' => t('Ignore paths'),
+    '#description' => t('Every URL placed here, will not have any Social links.'),
+    '#default_value' => variable_get('easysocial_ignore_paths', ''),
+  );
   
   $form = system_settings_form($form);
   
@@ -179,13 +245,46 @@ function easy_social_theme() {
  * Prepare node to display easy social
  */
 function easy_social_preprocess_node(&$variables) {
+  
   //Prepare a variable to send to prepare links
   $node_info = new stdClass;
   $node_info->nid = $variables['nid'];
   $node_info->type = $variables['type'];
   $node_info->title = $variables['title'];
-  //Concatenate the easy social to my node content
-  $variables['content'] .= _easy_social_prepare_node_links($node_info);
+  
+  $urls_ignored = variable_get('easysocial_ignore_paths', '');
+
+  $page_match = FALSE;
+  
+  $path = drupal_get_path_alias($_GET['q']);
+  
+  // Compare with the internal and path alias (if any).
+  $page_match = drupal_match_path($path, $urls_ignored);
+  
+  if ($path != $_GET['q']) {
+    $page_match = $page_match || drupal_match_path($_GET['q'], $urls_ignored);
+  }
+          
+  if(!$page_match){ 
+    //Load the Easy Social stuff
+    $prepare_easy_social = _easy_social_prepare_node_links($node_info);
+
+    //Teaser Display
+    if($variables['teaser'] && isset($prepare_easy_social['display']['teaser'])){
+      $variables['content'] .= $prepare_easy_social['html'];
+    }
+
+    //Full node display
+    if($variables['page'] && isset($prepare_easy_social['display']['fullnode'])){
+      if(isset($prepare_easy_social['position']['top'])){
+        $variables['content'] = $prepare_easy_social['html'] . $variables['content'];
+      }
+      if(isset($prepare_easy_social['position']['bottom'])){
+        $variables['content'] .= $prepare_easy_social['html'];
+      }
+    }
+  }
+    
 }
 
 /**
@@ -206,11 +305,15 @@ function _easy_social_prepare_node_links($node) {
     if(variable_get('easysocial_' . $node->type . '_override', '') == 1){
       $type = variable_get('easysocial_' . $node->type . '_typebtn', '');
       $buttons = variable_get('easysocial_' . $node->type . '_social_buttons', array());
+      $position = variable_get('easysocial_' . $node->type . '_btn_positioning', array('bottom'));
+      $display = variable_get('easysocial_' . $node->type . '_node_view', array('teaser', 'fullnode'));
     } 
       //Global settings
       else {
         $type = variable_get('easysocial_global_typebtn', '');
         $buttons = variable_get('easysocial_global_social_buttons', array());
+        $position = variable_get('easysocial_global_btn_positioning', array('bottom'));
+        $display = variable_get('easysocial_global_node_view', array('teaser', 'fullnode'));
     }
     $buttons = array_filter($buttons);
 
@@ -239,9 +342,15 @@ function _easy_social_prepare_node_links($node) {
     }
   
   }
-  
-  return $output;
-  
+
+  $return = array('html' => $output);
+  if($position){
+    $return += array('position' => array_filter($position));
+  }
+  if($display){
+    $return += array('display' => array_filter($display));
+  }
+  return $return;
 }
 
 
@@ -249,28 +358,28 @@ function _easy_social_prepare_node_links($node) {
  * Add external facebook js
  */
 function _easysocial_js_add_facebook(){
-  drupal_add_js("$.getScript('http://static.ak.fbcdn.net/connect.php/js/FB.Share');", 'inline');
+  drupal_add_js(drupal_get_path('module', 'easy_social') . '/js/easy_social.facebook.js');
 }
 
 /**
  * Add external twitter js
  */
 function _easysocial_js_add_twitter(){
-  drupal_add_js("$.getScript('http://platform.twitter.com/widgets.js');", 'inline');
+  drupal_add_js(drupal_get_path('module', 'easy_social') . '/js/easy_social.twitter.js');
 }
 
 /**
  * Add external googleplus js
  */
 function _easysocial_js_add_googleplus(){
-  drupal_add_js("$.getScript('https://apis.google.com/js/plusone.js');", 'inline');
+  drupal_add_js(drupal_get_path('module', 'easy_social') . '/js/easy_social.googleplus.js');
 }
 
 /**
  * Add external linkedin js
  */
 function _easysocial_js_add_linkedin(){
-  drupal_add_js("$.getScript('http://platform.linkedin.com/in.js');", 'inline');
+  drupal_add_js(drupal_get_path('module', 'easy_social') . '/js/easy_social.linkedin.js');
 }
 
 /**

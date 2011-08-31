@@ -11,14 +11,14 @@
  <div id='easysocial-box'>
   <?php if(isset($social_links['twitter'])): ?>
   <span class='easysocial-widget-twitter'><?php echo $social_links['twitter']; ?></span>  
-  <? endif; ?>
+  <?php endif; ?>
   <?php if(isset($social_links['facebook'])): ?>
   <span class='easysocial-widget-facebook'><?php echo $social_links['facebook']; ?></span>  
-  <? endif; ?>
+  <?php endif; ?>
   <?php if(isset($social_links['googleplus'])): ?>
   <span class='easysocial-widget-googleplus'><?php echo $social_links['googleplus']; ?></span>  
-  <? endif; ?>
+  <?php endif; ?>
   <?php if(isset($social_links['linkedin'])): ?>
   <span class='easysocial-widget-linkedin'><?php echo $social_links['linkedin']; ?></span>  
-  <? endif; ?>
+  <?php endif; ?>
 </div>
